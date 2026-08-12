@@ -1,0 +1,25 @@
+# secrets
+.env
+.env.local
+*.key
+
+# machine-local Claude Code permission state
+.claude/settings.local.json
+
+# generated
+out/
+cache/
+*.csv
+!context/**/*.csv
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# node
+node_modules/
+
+# macOS
+.DS_Store

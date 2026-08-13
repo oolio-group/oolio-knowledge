@@ -70,8 +70,8 @@ One block per article, plus a summary table at the end.
     "Creating a Product (in Back Office 2.0)". No unique content worth carrying over.
   failing_claims:
     - claim: "Click Add Product in the top right"
-      why: "2.0 uses a Create button menu in the control bar"
-      evidence: web/app/components/CreateButtonMenu/index.tsx:18
+      why: "2.0 uses a Create button menu in the control bar, labelled Create"
+      evidence: web/app/components/TreeTable/TreeTable.client.tsx:271
   duplicate_of: https://help.oolio.com/create-standard-products-back-office-2.0
   tree_features: []
   suggested_category: Products

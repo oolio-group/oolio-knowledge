@@ -79,4 +79,8 @@ before they exist. The CSV build resolves these to real URLs. Never hand-write a
 
 ## When you are done
 
-Hand to `accuracy-reviewer`. Expect to be sent back. That is the process working.
+Set `status: in_review` in the frontmatter and in `docs_document`, then hand to
+`accuracy-reviewer`. Expect to be sent back. That is the process working.
+
+`approved` is not yours to set — see the lifecycle table in `CLAUDE.md` §6. A human
+moves a draft there once review has passed, and nothing else is exported.

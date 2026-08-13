@@ -54,10 +54,31 @@ draft-then-publish model.
 | `page_type` | the §10 formula this article follows |
 | `hubspot_category` / `hubspot_subcategory` | the two CSV columns, separate from the legacy `section` / `category` |
 | `keywords` | CSV column |
-| `app_version` | `legacy` / `2.0` / `both` — the distinction that makes the Products triage possible |
+| `app_version` | `legacy` / `v2` / `both` / `unclear` — the distinction that makes the Products triage possible |
 | `updated_at` | there is only a `created_at` today |
 
 and makes `url` nullable, since a draft has no URL yet.
+
+### `app_version` is provisional — do not build on it yet
+
+The enum label is **`v2`**, not `2.0`. Writing `'2.0'` raises `invalid input value for
+enum docs_app_version`. Anything that sets this column reads its values from the
+migration, not from prose.
+
+The four values are enough to triage the 38 Back Office / Products articles, which is
+the job they were added for, and they are **not** settled as a general versioning model.
+Two known weaknesses:
+
+- `both` and `unclear` are doing different jobs — "accurate for either app" versus "we
+  have not looked yet" — and only one of those is a finished state. A triage pass that
+  leaves rows at `unclear` has not finished.
+- A per-document enum cannot express an article that is *mostly* right for 2.0 with two
+  wrong steps. Today that is `update` in the reconciler's verdict and `both` here, which
+  loses the distinction between "covers both apps deliberately" and "needs small
+  corrections".
+
+If versioning turns out to need more than a per-article label, this column is the wrong
+shape and should be replaced rather than extended. Flag it before adding a fifth value.
 
 ## The queries you will actually run
 

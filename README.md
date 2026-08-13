@@ -13,6 +13,18 @@ cp .env.example .env          # then fill in the two Supabase keys
 pip3 install --break-system-packages markdown bleach
 ```
 
+If pip rejects `--break-system-packages`, you are on Python 3.10 or older (the flag is
+3.11+). Use `pip3 install --user markdown bleach` instead.
+
+**`.env` is not enough for the MCP server.** `scripts/build_csv.py` reads `.env`
+directly, but `.mcp.json` expands `${SUPABASE_ACCESS_TOKEN}` from the *process*
+environment. Export it in your shell before launching, or the Supabase MCP server
+starts unauthenticated:
+
+```bash
+set -a && source .env && set +a
+```
+
 Start Claude Code with the code and the vault attached, or agents can only see this repo:
 
 ```bash

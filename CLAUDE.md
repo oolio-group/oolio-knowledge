@@ -138,13 +138,41 @@ title: Create a product group
 page_type: task                     # task | hub | track | reference | fix | concept | release | known_issue
 category: Products                  # HubSpot CATEGORY
 subcategory: Product setup          # HubSpot SUBCATEGORY
-status: drafting                    # planned | drafting | in_review | published | retired
+status: drafting                    # planned | drafting | in_review | approved | published | retired
 features: [<feature.id>, ...]       # Tree features this covers; empty is valid
 sources:
   - products@web/app/routes/_app.$orgId.products._index.tsx:24
   - tree:feature/<uuid>
 ---
 ```
+
+### The lifecycle, and who moves it
+
+```
+planned ──► drafting ──► in_review ──► approved ──► published
+                            │                          │
+                            └──► (sent back) ◄─────── retired
+```
+
+| Status | Set by | Means |
+|---|---|---|
+| `planned` | whoever identifies the gap | needed, nothing written |
+| `drafting` | `article-writer` | being written in the vault |
+| `in_review` | `article-writer`, on handing over | with `accuracy-reviewer` or a human |
+| `approved` | **a human, never an agent** | passed review, eligible for export |
+| `published` | `build_csv.py` after a confirmed import | live in HubSpot, `url` populated |
+| `retired` | `article-reconciler` verdict, human-confirmed | withdrawn; row kept for history |
+
+**`approved` is the gate, and it is the one status no agent may set.** Only rows at
+`status = 'approved'` are exported to the CSV — an article that never reaches it never
+reaches a customer, and an article that reaches it without a human is exactly the
+failure hard rule 4 exists to prevent. `accuracy-reviewer` returning `verdict: pass`
+makes a draft *eligible* for `approved`; it does not confer it.
+
+Two check constraints enforce the tail of this in the database: a row at `approved` or
+`published` must carry `slug`, both HubSpot category columns and a non-empty `summary`;
+a row at `published` must have a `url`. Attempting to skip a step fails the write rather
+than shipping a half-populated article.
 
 `page_type` carries the how-to/troubleshooting distinction: **task** is the how-to,
 **fix** is the troubleshooting guide. They do not get their own folders — a menus

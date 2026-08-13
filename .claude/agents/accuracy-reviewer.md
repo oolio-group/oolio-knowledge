@@ -85,3 +85,7 @@ Any blocking finding means `verdict: fail`.
 
 **Never resolve a finding yourself.** If you rewrite the line, nobody learns the draft
 was wrong, and the writer keeps making the same error. Report it and send it back.
+
+**Never set `status: approved`.** A `verdict: pass` makes the draft *eligible* for
+approval and nothing more — a human moves it. Leave the row at `in_review` and say what
+you checked. Only `approved` rows reach the CSV, and therefore a customer.

@@ -50,6 +50,7 @@ alter table public.docs_document
   add column if not exists slug                 text,
   add column if not exists vault_path           text,
   add column if not exists page_type            docs_page_type,
+  add column if not exists surface              text,
   add column if not exists hubspot_category     text,
   add column if not exists hubspot_subcategory  text,
   add column if not exists keywords             text,
@@ -64,7 +65,14 @@ comment on column public.docs_document.slug is
 comment on column public.docs_document.vault_path is
   'Path to the draft body in the my_brain vault, relative to vault root.';
 comment on column public.docs_document.app_version is
-  'Which application this article describes. legacy = original Back Office, v2 = Back Office 2.0.';
+  'Migration-scoped. Which application this article describes: legacy = original Back
+   Office, v2 = Back Office 2.0. Exists to triage the Back Office / Products set before
+   2.0 becomes the default on 2026-08-17. Do not extend it — use surface instead.';
+comment on column public.docs_document.surface is
+  'Which app the reader actually opens, from product_repo_map.package_name — e.g.
+   backoffice-app, adjustments-app, pos-app. Deliberately unconstrained text: the estate
+   is mid-decomposition out of the original POS monorepo and new packages land faster
+   than an enum can be migrated. Null until assigned.';
 comment on column public.docs_document.body_html is
   'Cache of the live page body, populated when triaging. Not the source of truth for drafts.';
 comment on column public.docs_document.hubspot_category is

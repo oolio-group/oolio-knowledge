@@ -38,8 +38,19 @@ them degrades the domain wikis for every other purpose.
 |---|---|---|
 | `products` | `~/Documents/GitHub/products` | Back Office 2.0 — Menus, Price Lists, Products, Image Library, Variants, Option Groups, Schedule |
 
+Verified 2026-08-13: `oolio-group/products`, `web/app/routes/`,
+`web/app/constants/message.ts`, `web/app/constants/permissions.ts`, `docs/specs/`,
+`docs/adr/` and `docs/superpowers/plans/` all exist as described. Alongside `web/` the
+repo holds `services/products-api`, `services/products-authz` and
+`packages/products-sdk` — the server side of anything you find in `web/`.
+
 `product_repo_map` in Supabase has 38 repo↔product mappings. Clone lazily — only what
 the current section needs. `products` alone is 206 MB.
+
+**The map is incomplete and does not join to the Tree.** `products` has no row in it,
+and 25 of the 38 rows name a product that does not exist in the `products` table. See
+`context/registry.md` for the detail. Do not conclude a capability has no repo because
+the map is silent — ask.
 
 High-value files in `products`:
 

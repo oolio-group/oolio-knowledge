@@ -54,31 +54,57 @@ draft-then-publish model.
 | `page_type` | the §10 formula this article follows |
 | `hubspot_category` / `hubspot_subcategory` | the two CSV columns, separate from the legacy `section` / `category` |
 | `keywords` | CSV column |
-| `app_version` | `legacy` / `v2` / `both` / `unclear` — the distinction that makes the Products triage possible |
+| `app_version` | `legacy` / `v2` / `both` / `unclear` — migration-scoped, see below |
+| `surface` | which app the reader opens, from `product_repo_map.package_name` |
 | `updated_at` | there is only a `created_at` today |
 
 and makes `url` nullable, since a draft has no URL yet.
 
-### `app_version` is provisional — do not build on it yet
+### `app_version` is migration scaffolding. `surface` is the durable column.
 
 The enum label is **`v2`**, not `2.0`. Writing `'2.0'` raises `invalid input value for
 enum docs_app_version`. Anything that sets this column reads its values from the
 migration, not from prose.
 
-The four values are enough to triage the 38 Back Office / Products articles, which is
-the job they were added for, and they are **not** settled as a general versioning model.
-Two known weaknesses:
+`app_version` answers one binary question — does this article describe the original Back
+Office or 2.0 — and that question only has a meaningful answer while both exist. It is
+there to triage the 38 Back Office / Products articles before 2026-08-17. **Do not
+extend it.** Adding a fifth value is the signal that you needed `surface`.
 
-- `both` and `unclear` are doing different jobs — "accurate for either app" versus "we
-  have not looked yet" — and only one of those is a finished state. A triage pass that
-  leaves rows at `unclear` has not finished.
-- A per-document enum cannot express an article that is *mostly* right for 2.0 with two
-  wrong steps. Today that is `update` in the reconciler's verdict and `both` here, which
-  loses the distinction between "covers both apps deliberately" and "needs small
-  corrections".
+The reason it cannot generalise is the shape of the estate. Oolio is mid-decomposition:
+the original POS monorepo (React Native) is being broken into separate React/Remix apps,
+capability by capability. Product management already moved out of `pos` into its own app;
+`adjustments` and `giftcards` have their own repos; more will follow. Consequences:
 
-If versioning turns out to need more than a per-article label, this column is the wrong
-shape and should be replaced rather than extended. Flag it before adding a fifth value.
+- **"Back Office" is not an app.** `product_repo_map` maps ten packages across eight
+  repos to the product "Office" — `backoffice-app`, `adjustments-app`, `giftcards/admin`,
+  `loyalty-management-app`, `feedback-settings-app`, `orders-management-app`,
+  `reservations-management-app`, `tags-backoffice-app`, `tags-merchant-app`, `one`. A
+  binary version label cannot say which of the ten a reader should open.
+- **The split repeats.** Every capability that leaves the monorepo has its own
+  "used to be in POS, now in X" moment. `legacy`/`v2` describes the first one only.
+- **A UI uplift is running across all apps**, independently of which app owns what. That
+  makes staleness — "verified against what, and when" — the problem that outlives both
+  columns. It is not modelled yet, deliberately. Raise it after 2026-08-17.
+
+`surface` is unconstrained text rather than an enum for the same reason: packages land
+faster than an enum migration. Validate against `product_repo_map.package_name` at write
+time, not in the schema.
+
+### Two known problems with `product_repo_map`
+
+Verified 2026-08-13, both of which affect how agents route from an article to code:
+
+1. **The `products` repo is missing.** `oolio-group/products` is real and active, and it
+   is where Back Office 2.0 product management lives — but it has no row. Nothing routes
+   an article to it automatically.
+2. **The vocabulary does not join to the Tree.** 25 of the 38 rows carry a `product_name`
+   that does not exist in `products` — Office, Pay, Insights, Loyalty, Gift Cards,
+   Accounts, CDS, Delivery, Feedback, Order Ready Display. Only 13 match. So
+   `feature → product → repo` cannot be resolved by join today, and an agent that needs
+   the code for a feature has to be told the repo.
+
+Until both are fixed, treat the map as a hint, not a lookup.
 
 ## The queries you will actually run
 
